@@ -1,4 +1,4 @@
-# Ava Ertebat Sazan DJANGO SERVER
+# Spotter DJANGO SERVER
 
 ## Tech stack
 
@@ -69,7 +69,7 @@ these commands for PowerShell if you want.
 #### Clone this repo anywhere you want and move into the directory:
 
 ```sh
-git https://github.com/ava/server.git
+git clone https://github.com/The-Gentlman/Spotter.git
 cd server
 ```
 
@@ -116,7 +116,7 @@ make dev/migrate
 
 Visit [http://localhost:8000](http://localhost:8000) in your favorite browser.
 
-You should see Ava Server
+You should see Spotter Server
 
 #### Connection To Fronend of this application:
 
@@ -142,7 +142,3 @@ code and customizing it.
 This file is ignored from version control so it will never be commit. There's a
 number of environment variables defined here that control certain options and
 behavior of the application.
-
-
-
-
