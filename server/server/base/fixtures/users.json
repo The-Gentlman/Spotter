@@ -1,0 +1,24 @@
+[
+{
+  "model": "account.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$g7zFJUVRVGW3pcWhuPewNg$a2DRLGDDhFdwz4OxggCrultziVVjmNPW5SV0wi8rA6M=",
+    "last_login": "2024-12-11T11:23:05.650Z",
+    "is_superuser": true,
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2024-12-03T18:57:14.671Z",
+    "first_name": "",
+    "last_name": "",
+    "company": null,
+    "email": "mforoozani@gmail.com",
+    "phone_number": null,
+    "username": null,
+    "phone_verified": false,
+    "phone_verification_code": null,
+    "verification_code_expiry": null,
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]

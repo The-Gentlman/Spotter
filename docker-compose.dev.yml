@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  backend:
+    container_name: server
+    build: ./server/server
+    volumes:
+      - ./server/server:/app
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    env_file:
+      - .env
+    stdin_open: true
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+    command: python manage.py runserver 0.0.0.0:8888
+    depends_on: 
+      - database
+  database:
+    container_name: database
+    image: postgres:17-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    command: postgres -p ${SQL_PORT}
+    env_file:
+    
+      - .env
+
+volumes:
+  postgres_data:
+  django_static_volume:

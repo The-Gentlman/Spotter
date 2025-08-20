@@ -1,0 +1,41 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "==4.2.1"
+djangorestframework = "*"
+markdown = "*"
+django-filter = "*"
+django-environ = "*"
+djangorestframework-simplejwt = "*"
+pyjwt = "*"
+drf-yasg = "*"
+django-groups-manager = "*"
+jsonfield = "*"
+drf-spectacular = {extras = ["sidecar"], version = "*"}
+django-jet = "*"
+django-cors-headers = "*"
+djangorestframework-camel-case = "*"
+gunicorn = "*"
+psycopg2 = "*"
+django-better-admin-arrayfield = "*"
+django-jsonform = "*"
+persiantools = "*"
+django-admin-persian-fonts = "*"
+openpyxl = "*"
+django-simple-history = "*"
+channels = "*"
+daphne = "*"
+djangochannelsrestframework = "*"
+python-dateutil = "*"
+django-ordered-model = "*"
+
+[dev-packages]
+black = "*"
+pylint-django = "*"
+
+[requires]
+python_version = "3.11"
+python_full_version = "3.11.1"
