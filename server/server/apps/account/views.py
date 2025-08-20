@@ -1,4 +1,8 @@
-from apps.account.serializers import UserResponseSerializer, UserUpdateSerializer
+from apps.account.serializers import (
+    UserResponseSerializer,
+    UserShortSerializer,
+    UserUpdateSerializer,
+)
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.hashers import check_password
@@ -13,6 +17,14 @@ class UserMatchPermission(BasePermission):
     def has_permission(self, request, view):
         user_id = view.kwargs.get("user_id")
         return str(request.user.id) == str(user_id)
+
+
+class UserSearchApi(APIView):
+
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserShortSerializer(users, many=True)
+        return Response(serializer.data)
 
 
 class UserAPI(APIView):

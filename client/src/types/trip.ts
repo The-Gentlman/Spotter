@@ -6,7 +6,8 @@ export interface Trip {
     title: string;
     description: string;
     endDate: string | null;
-    driverName: string;
+    driver: string;
+    driverId: number | null;
     coDriverName: string;
     carrier: string;
     vehicleNumber: string;

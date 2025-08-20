@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
     Button,
@@ -10,27 +8,27 @@ import {
     TextField,
     Box,
     Stack,
+    Grid,
+    Typography,
+    Autocomplete,
+    CircularProgress,
 } from "@mui/material";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet-routing-machine";
-import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import type { Trip } from "../types/trip";
 import { createTrip } from "../api/trip";
-
+import { getUsers } from "../api/users";
+import type { User } from "../types/user";
 
 interface Props {
     onCreated?: () => void;
 }
 
-const defaultCenter: [number, number] = [39.8283, -98.5795]; // USA center
-
+const defaultCenter: [number, number] = [39.8283, -98.5795];
 
 interface MapClickHandlerProps {
     onSelect: (lat: number, lng: number) => void;
 }
-
 function MapClickHandler({ onSelect }: MapClickHandlerProps) {
     useMapEvents({
         click(e) {
@@ -39,8 +37,13 @@ function MapClickHandler({ onSelect }: MapClickHandlerProps) {
     });
     return null;
 }
+
 export default function CreateTripModal({ onCreated }: Props) {
     const [open, setOpen] = useState(false);
+
+    const [driverId, setDriverId] = useState<number | null>(null);
+    const [drivers, setDrivers] = useState<User[]>([]);
+    const [loadingDrivers, setLoadingDrivers] = useState(false);
 
     const [fromCoords, setFromCoords] = useState<[number, number] | null>(null);
     const [toCoords, setToCoords] = useState<[number, number] | null>(null);
@@ -55,9 +58,15 @@ export default function CreateTripModal({ onCreated }: Props) {
     const [vehicleNumber, setVehicleNumber] = useState("");
     const [trailerNumber, setTrailerNumber] = useState("");
 
-    const [setting, setSetting] = useState<"start" | "end" | null>(null);
+    useEffect(() => {
+        if (open) {
+            setLoadingDrivers(true);
+            getUsers()
+                .then((res) => setDrivers(res))
+                .finally(() => setLoadingDrivers(false));
+        }
+    }, [open]);
 
-    // reverse geocoding using Nominatim (OpenStreetMap)
     const fetchLocationName = async (lat: number, lon: number): Promise<string> => {
         try {
             const res = await fetch(
@@ -70,26 +79,13 @@ export default function CreateTripModal({ onCreated }: Props) {
         }
     };
 
-    const handleMapClick = async (e: any) => {
-        const { lat, lng } = e.latlng;
-        if (setting === "start") {
-            setFromCoords([lat, lng]);
-            setFromLocation(await fetchLocationName(lat, lng));
-            setSetting(null);
-        } else if (setting === "end") {
-            setToCoords([lat, lng]);
-            setToLocation(await fetchLocationName(lat, lng));
-            setSetting(null);
-        }
-    };
-
     const handleSubmit = async () => {
-        if (!fromCoords || !toCoords) return;
+        if (!fromCoords || !toCoords || !driverId) return;
 
         const payload: Partial<Trip> = {
+            driverId,
             fromLocation,
             toLocation,
-            // coordinates as [lat, lng]
             fromCoordinates: fromCoords,
             toCoordinates: toCoords,
             title,
@@ -118,6 +114,7 @@ export default function CreateTripModal({ onCreated }: Props) {
         setToCoords(null);
         setFromLocation("");
         setToLocation("");
+        setDriverId(null);
     };
 
     return (
@@ -129,58 +126,127 @@ export default function CreateTripModal({ onCreated }: Props) {
             <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
                 <DialogTitle>Create New Trip</DialogTitle>
                 <DialogContent>
-                    <Stack spacing={2} mt={1}>
-                        <TextField
-                            label="Title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Description"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            fullWidth
-                            multiline
-                            rows={2}
-                        />
-                        <TextField
-                            label="Co-Driver Name"
-                            value={coDriver}
-                            onChange={(e) => setCoDriver(e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Carrier"
-                            value={carrier}
-                            onChange={(e) => setCarrier(e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Vehicle Number"
-                            value={vehicleNumber}
-                            onChange={(e) => setVehicleNumber(e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Trailer Number"
-                            value={trailerNumber}
-                            onChange={(e) => setTrailerNumber(e.target.value)}
-                            fullWidth
-                        />
+                    <Stack spacing={3} mt={1}>
+                        {/* Trip Info */}
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            Trip Info
+                        </Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="Title"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Autocomplete
+                                    options={drivers}
+                                    getOptionLabel={(option) => option.fullName || ""}
+                                    loading={loadingDrivers}
+                                    onChange={(_, val) => setDriverId(val ? val.id : null)}
+                                    sx={{ width: "100%" }} // ✅ make it full width
+                                    renderOption={(props, option) => (
+                                        <li {...props} style={{ whiteSpace: "normal", wordBreak: "break-word" }}>
+                                            {option.fullName}
+                                        </li>
+                                    )}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Driver"
+                                            fullWidth
+                                            InputProps={{
+                                                ...params.InputProps,
+                                                sx: { fontSize: "0.95rem", paddingY: "6px" }, // ✅ slightly larger text
+                                                endAdornment: (
+                                                    <>
+                                                        {loadingDrivers ? (
+                                                            <CircularProgress color="inherit" size={20} />
+                                                        ) : null}
+                                                        {params.InputProps.endAdornment}
+                                                    </>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Grid>
 
-                        <TextField
-                            label="From Location"
-                            value={fromLocation}
-                            onChange={(e) => setFromLocation(e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
-                            label="To Location"
-                            value={toLocation}
-                            onChange={(e) => setToLocation(e.target.value)}
-                            fullWidth
-                        />
+                            <Grid item xs={12}>
+                                <TextField
+                                    label="Description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    fullWidth
+                                    multiline
+                                    rows={2}
+                                />
+                            </Grid>
+                        </Grid>
+
+                        {/* Vehicle Info */}
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            Vehicle Info
+                        </Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="Carrier"
+                                    value={carrier}
+                                    onChange={(e) => setCarrier(e.target.value)}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="Co-Driver Name"
+                                    value={coDriver}
+                                    onChange={(e) => setCoDriver(e.target.value)}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="Vehicle Number"
+                                    value={vehicleNumber}
+                                    onChange={(e) => setVehicleNumber(e.target.value)}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="Trailer Number"
+                                    value={trailerNumber}
+                                    onChange={(e) => setTrailerNumber(e.target.value)}
+                                    fullWidth
+                                />
+                            </Grid>
+                        </Grid>
+
+                        {/* Locations */}
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            Locations
+                        </Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="From Location"
+                                    value={fromLocation}
+                                    onChange={(e) => setFromLocation(e.target.value)}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="To Location"
+                                    value={toLocation}
+                                    onChange={(e) => setToLocation(e.target.value)}
+                                    fullWidth
+                                />
+                            </Grid>
+                        </Grid>
 
                         <Box height={400} mt={2}>
                             <MapContainer
@@ -196,15 +262,12 @@ export default function CreateTripModal({ onCreated }: Props) {
                                 <MapClickHandler
                                     onSelect={async (lat, lng) => {
                                         if (!fromCoords) {
-                                            // first click = start point
                                             setFromCoords([lat, lng]);
                                             setFromLocation(await fetchLocationName(lat, lng));
                                         } else if (!toCoords) {
-                                            // second click = end point
                                             setToCoords([lat, lng]);
                                             setToLocation(await fetchLocationName(lat, lng));
                                         } else {
-                                            // both already set → reset and start again
                                             setFromCoords([lat, lng]);
                                             setFromLocation(await fetchLocationName(lat, lng));
                                             setToCoords(null);
@@ -225,29 +288,16 @@ export default function CreateTripModal({ onCreated }: Props) {
                                 )}
                             </MapContainer>
                         </Box>
-
-                        <Box display="flex" gap={2} mt={2}>
-                            <Button
-                                variant="outlined"
-                                color="primary"
-                                onClick={() => setSetting("start")}
-                            >
-                                Set Start on Map
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                color="secondary"
-                                onClick={() => setSetting("end")}
-                            >
-                                Set Destination on Map
-                            </Button>
-                        </Box>
                     </Stack>
                 </DialogContent>
 
                 <DialogActions>
                     <Button onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button onClick={handleSubmit} variant="contained" disabled={!fromCoords || !toCoords}>
+                    <Button
+                        onClick={handleSubmit}
+                        variant="contained"
+                        disabled={!fromCoords || !toCoords || !driverId}
+                    >
                         Create Trip
                     </Button>
                 </DialogActions>

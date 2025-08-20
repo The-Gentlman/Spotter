@@ -9,18 +9,13 @@ class TripAdmin(admin.ModelAdmin):
 
     list_display = (
         "id",
-        # "driver",
+        "driver",
         "co_driver_name",
         "carrier",
         "vehicle_number",
         "from_location",
         "to_location",
-        "total_miles_today",
         "status",
-        "start_date",
-        "end_date",
-        "from_coordinates_display",
-        "to_coordinates_display",
     )
 
     def from_coordinates_display(self, obj):

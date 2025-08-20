@@ -6,8 +6,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "birthday",
-            "gender",
+            "first_name",
+            "last_name",
             "phone_number",
         ]
 
@@ -40,14 +40,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserShortSerializer(serializers.ModelSerializer):
-    first_name = serializers.SerializerMethodField()
-    last_name = serializers.SerializerMethodField()
+    full_name = serializers.SerializerMethodField()
 
-    def get_first_name(self, obj):
-        return obj.first_name_fa or obj.first_name
-
-    def get_last_name(self, obj):
-        return obj.last_name_fa or obj.last_name
+    def get_full_name(self, instance):
+        return instance.full_name
 
     class Meta:
         model = User
@@ -56,8 +52,6 @@ class UserShortSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "full_name",
-            "gender",
-            "birthday",
         )
 
 

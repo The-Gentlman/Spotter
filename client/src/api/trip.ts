@@ -6,8 +6,8 @@ export const getTrips = async (): Promise<Trip[]> => {
     return res.data;
 };
 
-export const getTrip = async (tripId: number): Promise<Trip> => {
-    const res = await apiClient.get<Trip>(`/trip/${tripId}`);
+export const getTrip = async (id: number): Promise<Trip> => {
+    const res = await apiClient.get<Trip>(`/trip/${id}`);
     return res.data;
 };
 
@@ -17,13 +17,13 @@ export const createTrip = async (payload: Partial<Trip>): Promise<Trip> => {
 };
 
 export const updateTrip = async (
-    tripId: number,
-    payload: Partial<Trip>
+    id: number,
+    data: Partial<Trip>
 ): Promise<Trip> => {
-    const res = await apiClient.patch<Trip>(`/trip/${tripId}`, payload);
+    const res = await apiClient.put<Trip>(`/trip/${id}`, data);
     return res.data;
 };
 
-export const deleteTrip = async (tripId: number): Promise<void> => {
-    await apiClient.delete(`/trip/${tripId}`);
+export const deleteTrip = async (id: number): Promise<void> => {
+    await apiClient.delete(`/trip/${id}`);
 };

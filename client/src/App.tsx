@@ -10,16 +10,13 @@ import {
   CssBaseline,
   Box,
   CircularProgress,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
 } from "@mui/material";
 import type { Trip } from "./types/trip";
 import { getTrips } from "./api/trip";
 import CreateTripModal from "./components/CreateTripModal";
-
+import TripsPage from "./routes/TripPage";
+import { Route, Routes } from "react-router-dom";
+import TripDetailPage from "./pages/trip/[id]";
 
 export default function App() {
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -49,8 +46,6 @@ export default function App() {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Trip Management
           </Typography>
-
-          {/* 👇 “New Trip” button + modal inside */}
           <CreateTripModal onCreated={loadTrips} />
         </Toolbar>
       </AppBar>
@@ -62,26 +57,11 @@ export default function App() {
             <CircularProgress />
           </Box>
         ) : (
-          <Paper>
-            <List>
-              {trips.map((trip, index) => (
-                <Box key={trip.id}>
-                  <ListItem>
-                    <ListItemText
-                      primary={`${trip.fromLocation || "??"} → ${trip.toLocation || "??"}`}
-                      secondary={`Driver: ${trip.driverName || "N/A"} | Status: ${trip.status}`}
-                    />
-                  </ListItem>
-                  {index < trips.length - 1 && <Divider />}
-                </Box>
-              ))}
-              {trips.length === 0 && (
-                <ListItem>
-                  <ListItemText primary="No trips yet. Create one!" />
-                </ListItem>
-              )}
-            </List>
-          </Paper>
+          <Routes>
+            <Route path="/" element={<TripsPage />} />
+            <Route path="/trips" element={<TripsPage />} />
+            <Route path="/trips/:id" element={<TripDetailPage />} />
+          </Routes>
         )}
       </Container>
     </>

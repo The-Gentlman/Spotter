@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from apps.trip.models import Trip
 from apps.trip.filters import TripFilter
-from django.utils import timezone
 
 
 class TripsView(GenericAPIView):
@@ -34,8 +33,6 @@ class TripsView(GenericAPIView):
 
     def post(self, request):
         data = request.data
-        data["driver_id"] = 1
-        data["start_date"] = timezone.now().date()
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             trip = serializer.save()
@@ -52,7 +49,7 @@ class TripsView(GenericAPIView):
 
 
 class TripDetailView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     serializer_class = TripSerializer
     lookup_field = "id"
 

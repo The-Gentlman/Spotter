@@ -20,7 +20,7 @@ class Trip(models.Model):
     title = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
 
-    start_date = models.DateField()
+    start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
 
     driver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trips")
