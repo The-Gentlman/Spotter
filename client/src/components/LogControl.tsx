@@ -1,4 +1,3 @@
-// src/components/LogControls.tsx
 import { Box, Button } from "@mui/material";
 
 interface Props {

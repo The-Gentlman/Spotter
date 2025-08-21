@@ -1,5 +1,3 @@
-// src/components/eld/ELDGrid.tsx
-import React from "react";
 import { Box } from "@mui/material";
 import type { DutySegment } from "../../types/log";
 
@@ -12,7 +10,6 @@ const STATUS_ORDER: Record<string, number> = {
 
 const STATUS_LABELS = ["Off Duty", "Sleeper", "Driving", "On Duty"];
 
-// رنگ خط‌ها برای هر استیت
 const STATUS_COLORS: Record<string, string> = {
     OFF_DUTY: "#4caf50",
     SLEEPER: "#2196f3",
@@ -21,16 +18,15 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 interface Props {
-    segments: DutySegment[]; // { start: string, end: string, status: string }
+    segments: DutySegment[];
 }
 
 export default function ELDGrid({ segments }: Props) {
-    const width = 800; // پیکسل
+    const width = 800;
     const height = 200;
     const hourWidth = width / 24;
     const rowHeight = height / STATUS_LABELS.length;
 
-    // helper: تبدیل HH:mm به دقیقه
     const toMinutes = (time: string) => {
         const [h, m] = time.split(":").map(Number);
         return h * 60 + m;

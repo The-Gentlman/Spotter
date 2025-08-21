@@ -154,7 +154,6 @@ const TripDetailPage = () => {
 
     return (
         <Box p={3}>
-            {/* Header */}
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                 <Typography variant="h4" fontWeight="bold">
                     Trip #{trip.id}
@@ -166,7 +165,6 @@ const TripDetailPage = () => {
                 />
             </Box>
 
-            {/* Trip Info */}
             <Paper sx={{ p: 3, mb: 3, borderRadius: 2, boxShadow: 3 }}>
                 <Stack spacing={1.5} divider={<Divider />}>
                     <Box display="flex" gap={1} alignItems="center">
@@ -204,7 +202,6 @@ const TripDetailPage = () => {
                 </Stack>
             </Paper>
 
-            {/* Actions */}
             <Box mb={3} display="flex" gap={2}>
                 <Button
                     variant="contained"
@@ -224,7 +221,6 @@ const TripDetailPage = () => {
                 </Button>
             </Box>
 
-            {/* Update Dialog */}
             <Dialog
                 open={openUpdate}
                 onClose={() => setOpenUpdate(false)}

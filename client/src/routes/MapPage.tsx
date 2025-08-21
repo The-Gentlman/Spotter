@@ -5,7 +5,6 @@ const MapPage = () => {
     const from: [number, number] = [29.5918, 52.5837];
     const to: [number, number] = [35.6892, 51.3890];
 
-    // Mock gas stations near route
     const gasStations: [number, number][] = [
         [31.0, 52.0],
         [33.5, 51.2],

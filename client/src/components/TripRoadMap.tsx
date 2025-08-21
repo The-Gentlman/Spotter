@@ -1,4 +1,3 @@
-// components/TripRouteMap.tsx
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -15,7 +14,6 @@ import {
 import MapIcon from "@mui/icons-material/Map";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
-// --- Routing Component ---
 interface TripRouteMapProps {
     from: [number, number];
     to: [number, number];
@@ -79,7 +77,6 @@ function Routing({ from, to }: TripRouteMapProps) {
     return null;
 }
 
-// --- Main Component ---
 export default function TripRouteMap({ from, to }: TripRouteMapProps) {
     const [loading, setLoading] = useState(false);
 
@@ -101,7 +98,7 @@ export default function TripRouteMap({ from, to }: TripRouteMapProps) {
                 title="Direction"
                 titleTypographyProps={{ variant: "h6" }}
                 action={
-                    <IconButton onClick={handleReload} title="به‌روزرسانی مسیر">
+                    <IconButton onClick={handleReload} title="Upadate Route">
                         <RefreshIcon />
                     </IconButton>
                 }

@@ -1,4 +1,3 @@
-// src/api/logs.ts
 import apiClient from "./client";
 import type { DutySegment } from "../types/log";
 
@@ -31,17 +30,14 @@ export async function updateLogStatusByTrip(
     const mm = String(now.getMinutes()).padStart(2, "0");
     const currentTime = `${hh}:${mm}`;
 
-    // کپی segments قبلی
     const segments = [...(log.segments || [])];
 
     if (segments.length > 0) {
         const last = segments[segments.length - 1];
 
         if (last.status === newStatus) {
-            // فقط end رو آپدیت کن
             last.end = currentTime;
         } else {
-            // سگمنت جدید اضافه کن
             segments.push({
                 start: currentTime,
                 end: currentTime,
@@ -49,7 +45,6 @@ export async function updateLogStatusByTrip(
             });
         }
     } else {
-        // اولین سگمنت لاگ
         segments.push({
             start: currentTime,
             end: currentTime,
@@ -57,7 +52,6 @@ export async function updateLogStatusByTrip(
         });
     }
 
-    // PATCH کردن فقط بخش segments
     const patchRes = await apiClient.patch<LogDay>(`${API_BASE}/${id}`, {
         trip: tripId,
         segments,

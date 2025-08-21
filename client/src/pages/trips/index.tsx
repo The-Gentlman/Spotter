@@ -29,7 +29,6 @@ export default function TripsPage() {
 
     return (
         <Box sx={{ p: 3 }}>
-            {/* Header */}
             <Stack
                 direction="row"
                 alignItems="center"
@@ -42,7 +41,6 @@ export default function TripsPage() {
                 <CreateTripModal onCreated={handleTripCreated} />
             </Stack>
 
-            {/* Trip list */}
             {trips.length === 0 ? (
                 <Paper
                     variant="outlined"

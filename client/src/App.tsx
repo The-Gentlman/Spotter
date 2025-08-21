@@ -18,6 +18,7 @@ import { Route, Routes } from "react-router-dom";
 import TripDetailPage from "./pages/trip/[id]";
 
 export default function App() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +40,6 @@ export default function App() {
     <>
       <CssBaseline />
 
-      {/* App Header */}
       <AppBar
         position="static"
         color="default"
@@ -64,7 +64,6 @@ export default function App() {
         </Toolbar>
       </AppBar>
 
-      {/* Main Content */}
       <Container sx={{ mt: 4, mb: 4 }}>
         {loading ? (
           <Box

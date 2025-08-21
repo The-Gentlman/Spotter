@@ -68,12 +68,10 @@ export default function LogsPanel({
                 Driver’s Daily Log
             </Typography>
 
-            {/* ELD Graph */}
             <Box mb={3}>
                 <ELDGrid segments={segments} />
             </Box>
 
-            {/* Hours Table */}
             <Table size="small">
                 <TableHead>
                     <TableRow>
@@ -105,7 +103,6 @@ export default function LogsPanel({
                         </TableRow>
                     ))}
 
-                    {/* Total Row */}
                     <TableRow sx={{ backgroundColor: "grey.100" }}>
                         <TableCell>
                             <Typography fontWeight="bold">Total</Typography>
