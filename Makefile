@@ -26,3 +26,9 @@ clean:
 	else \
 		echo "Aborted"; \
 	fi
+
+backup:
+	@bash backup.sh
+
+restore:
+	@bash Restore.sh
