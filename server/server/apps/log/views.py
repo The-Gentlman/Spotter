@@ -10,7 +10,7 @@ from django.utils.timezone import now
 
 
 class LogsView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     permission_groups = {
         "GET": ["_Public"],
     }
@@ -38,7 +38,7 @@ class LogsView(GenericAPIView):
 
 
 class LogDetailView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     serializer_class = LogDaySerializer
     lookup_field = "id"
 

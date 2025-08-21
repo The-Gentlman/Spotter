@@ -75,7 +75,6 @@ class LogDayAdmin(admin.ModelAdmin):
         ),
     )
 
-    # --- Custom helpers for cleaner UI ---
     def driving_hr(self, obj):
         return round(obj.driving / 60, 2)
 

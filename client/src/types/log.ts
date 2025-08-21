@@ -8,4 +8,11 @@ export interface LogDay {
     sleeper: number;
     cycle_remaining_hours: number;
     has_violation: boolean;
+    segments: DutySegment[];
 }
+
+export type DutySegment = {
+    start: string | number;
+    end: string | number;
+    status: "OFF_DUTY" | "SLEEPER" | "DRIVING" | "ON_DUTY";
+};

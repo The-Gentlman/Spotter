@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from decimal import Decimal
 from django.utils.functional import cached_property
 from apps.trip.models import Trip
@@ -104,7 +104,6 @@ class LogDay(models.Model):
         self.sleeper = totals["SLEEPER"]
         self.driving = totals["DRIVING"]
         self.on_duty = totals["ON_DUTY"]
-        self.has_violation = self.check_violation()
         self.cycle_remaining_hours = self.calc_cycle_remaining()
 
     def check_violation(self):
@@ -114,6 +113,10 @@ class LogDay(models.Model):
         if (self.driving + self.on_duty) > 14 * 60:
             return True
         return False
+
+    @property
+    def has_violation(self):
+        return (self.driving > 11 * 60) or (self.driving + self.on_duty > 14 * 60)
 
     def calc_cycle_remaining(self):
         """Example: 70/8 cycle remaining."""

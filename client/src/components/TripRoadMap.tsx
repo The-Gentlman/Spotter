@@ -25,8 +25,6 @@ function Routing({ from, to }: TripRouteMapProps) {
 
         control.on("routesfound", function (e: any) {
             const coordinates = e.routes[0].coordinates;
-
-            // Compute bounding box of the route
             const lats = coordinates.map((c: any) => c.lat);
             const lngs = coordinates.map((c: any) => c.lng);
             const minLat = Math.min(...lats);
@@ -34,7 +32,6 @@ function Routing({ from, to }: TripRouteMapProps) {
             const minLng = Math.min(...lngs);
             const maxLng = Math.max(...lngs);
 
-            // Overpass API query for gas stations inside bounding box
             const gasStationsQuery = `
                 [out:json];
                 node["amenity"="fuel"](${minLat},${minLng},${maxLat},${maxLng});

@@ -10,15 +10,21 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    TextField,
+    TextField
 } from "@mui/material";
 import type { Trip } from "../../types/trip";
 import { deleteTrip, getTrip, updateTrip } from "../../api/trip";
 import TripRouteMap from "../../components/TripRoadMap";
+import HOSSummaryCard from "../../components/HOSSummaryCard";
+import LogsPanel from "../../components/LogPanel";
+import LogControls from "../../components/LogControl";
+import { updateLogStatusByTrip } from "../../api/logs";
+import type { DutySegment } from "../../types/log";
 
 const TripDetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const [trip, setTrip] = useState<Trip | null>(null);
+    const [logDay, setLogDay] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [openUpdate, setOpenUpdate] = useState(false);
     const [formData, setFormData] = useState<Partial<Trip>>({});
@@ -63,17 +69,54 @@ const TripDetailPage = () => {
         }
     };
 
+    const handleStatusChange = async (status: DutySegment["status"]) => {
+        if (!trip || !logDay) return;
+
+        try {
+            const updatedLog = await updateLogStatusByTrip(
+                Number(trip.id),
+                logDay.id,
+                status
+            );
+            setLogDay({ ...updatedLog });
+            setTrip((prev) => {
+                if (!prev) return prev;
+
+                const updatedLogs = prev.logs.map((l) =>
+                    String(l.id) === String(updatedLog.id)
+                        ? { ...updatedLog }
+                        : l
+                );
+                return {
+                    ...prev,
+                    logs: [...updatedLogs],
+                };
+            });
+        } catch (err) {
+            console.error("Status change error:", err);
+        }
+    };
+
+
+
     useEffect(() => {
         if (!id) return;
-        getTrip(Number(id))
-            .then((data) => {
-                setTrip(data);
-                setLoading(false);
-            })
-            .catch((err) => {
+        (async () => {
+            try {
+                const tripData = await getTrip(Number(id));
+                setTrip(tripData);
+
+                if (Array.isArray(tripData.logs) && tripData.logs.length > 0) {
+                    const today = new Date().toISOString().split("T")[0];
+                    const todayLog = tripData.logs.find((log: any) => log.date === today) || tripData.logs[0];
+                    setLogDay(todayLog);
+                }
+            } catch (err) {
                 console.error("Error fetching trip:", err);
+            } finally {
                 setLoading(false);
-            });
+            }
+        })();
     }, [id]);
 
     if (loading) {
@@ -116,7 +159,6 @@ const TripDetailPage = () => {
                 </Button>
             </Box>
 
-            {/* Update Dialog */}
             <Dialog open={openUpdate} onClose={() => setOpenUpdate(false)} maxWidth="sm" fullWidth>
                 <DialogTitle>Update Trip</DialogTitle>
                 <DialogContent>
@@ -170,12 +212,30 @@ const TripDetailPage = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
             <Box mt={3}>
-                <TripRouteMap
-                    from={trip.fromCoordinates}
-                    to={trip.toCoordinates}
-                />
+                <TripRouteMap from={trip.fromCoordinates} to={trip.toCoordinates} />
             </Box>
+
+            {logDay && (
+                <Box mt={4}>
+                    <HOSSummaryCard
+                        drivingRemaining={Math.max(0, (660 - (logDay.driving ?? 0)) / 60)}
+                        onDutyRemaining={Math.max(0, (840 - (logDay.on_duty ?? 0)) / 60)}
+                        cycleRemaining={Number(logDay.cycle_remaining_hours ?? 0)}
+                    />
+                    <Box mt={2}>
+                        <LogsPanel
+                            segments={logDay.segments || []}
+                            offDuty={logDay.off_duty ?? 0}
+                            sleeper={logDay.sleeper ?? 0}
+                            driving={logDay.driving ?? 0}
+                            onDuty={logDay.on_duty ?? 0}
+                        />
+                        <LogControls onStatusChange={handleStatusChange} />
+                    </Box>
+                </Box>
+            )}
         </div>
     );
 };

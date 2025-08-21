@@ -16,6 +16,8 @@ class LogDayNestedSerializer(serializers.ModelSerializer):
             "sleeper",
             "cycle_remaining_hours",
             "has_violation",
+            "segments",
+            "recap_last_7_days",
         ]
 
 

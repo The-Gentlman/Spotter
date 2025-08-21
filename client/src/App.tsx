@@ -1,6 +1,3 @@
-// src/App.tsx
-"use client";
-
 import { useEffect, useState } from "react";
 import {
   AppBar,
@@ -10,7 +7,9 @@ import {
   CssBaseline,
   Box,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
+import { AddCircleOutline } from "@mui/icons-material";
 import type { Trip } from "./types/trip";
 import { getTrips } from "./api/trip";
 import CreateTripModal from "./components/CreateTripModal";
@@ -41,20 +40,45 @@ export default function App() {
       <CssBaseline />
 
       {/* App Header */}
-      <AppBar position="static">
+      <AppBar
+        position="static"
+        color="default"
+        elevation={1}
+        sx={{ bgcolor: "background.paper" }}
+      >
         <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{ flexGrow: 1, fontWeight: "bold", color: "text.primary" }}
+          >
             Trip Management
           </Typography>
-          <CreateTripModal onCreated={loadTrips} />
+          <CreateTripModal
+            onCreated={loadTrips}
+            triggerButton={
+              <IconButton color="primary">
+                <AddCircleOutline />
+              </IconButton>
+            }
+          />
         </Toolbar>
       </AppBar>
 
       {/* Main Content */}
-      <Container sx={{ mt: 4 }}>
+      <Container sx={{ mt: 4, mb: 4 }}>
         {loading ? (
-          <Box display="flex" justifyContent="center" py={4}>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            py={6}
+            color="text.secondary"
+          >
             <CircularProgress />
+            <Typography variant="body2" mt={2}>
+              Loading trips...
+            </Typography>
           </Box>
         ) : (
           <Routes>
