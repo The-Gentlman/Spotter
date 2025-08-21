@@ -3,8 +3,19 @@ import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import {
+    Card,
+    CardHeader,
+    CardContent,
+    IconButton,
+    Box,
+    Skeleton,
+} from "@mui/material";
+import MapIcon from "@mui/icons-material/Map";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
+// --- Routing Component ---
 interface TripRouteMapProps {
     from: [number, number];
     to: [number, number];
@@ -33,10 +44,9 @@ function Routing({ from, to }: TripRouteMapProps) {
             const maxLng = Math.max(...lngs);
 
             const gasStationsQuery = `
-                [out:json];
-                node["amenity"="fuel"](${minLat},${minLng},${maxLat},${maxLng});
-                out;
-            `;
+        [out:json];
+        node["amenity"="fuel"](${minLat},${minLng},${maxLat},${maxLng});
+        out;`;
 
             fetch(
                 `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
@@ -69,20 +79,58 @@ function Routing({ from, to }: TripRouteMapProps) {
     return null;
 }
 
+// --- Main Component ---
 export default function TripRouteMap({ from, to }: TripRouteMapProps) {
+    const [loading, setLoading] = useState(false);
+
+    const handleReload = () => {
+        setLoading(true);
+        setTimeout(() => setLoading(false), 800);
+    };
+
     return (
-        <div style={{ height: 400 }}>
-            <MapContainer
-                center={from}
-                zoom={6}
-                style={{ height: "100%", width: "100%" }}
-            >
-                <TileLayer
-                    attribution="&copy; OpenStreetMap contributors"
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Routing from={from} to={to} />
-            </MapContainer>
-        </div>
+        <Card
+            sx={{
+                borderRadius: 2,
+                boxShadow: 3,
+                overflow: "hidden",
+            }}
+        >
+            <CardHeader
+                avatar={<MapIcon color="primary" />}
+                title="Direction"
+                titleTypographyProps={{ variant: "h6" }}
+                action={
+                    <IconButton onClick={handleReload} title="به‌روزرسانی مسیر">
+                        <RefreshIcon />
+                    </IconButton>
+                }
+                sx={{
+                    bgcolor: "background.default",
+                    borderBottom: 1,
+                    borderColor: "divider",
+                }}
+            />
+
+            <CardContent sx={{ p: 0, height: 400 }}>
+                {loading ? (
+                    <Skeleton variant="rectangular" width="100%" height="100%" />
+                ) : (
+                    <Box sx={{ height: "100%", width: "100%" }}>
+                        <MapContainer
+                            center={from}
+                            zoom={6}
+                            style={{ height: "100%", width: "100%" }}
+                        >
+                            <TileLayer
+                                attribution="&copy; OpenStreetMap contributors"
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            <Routing from={from} to={to} />
+                        </MapContainer>
+                    </Box>
+                )}
+            </CardContent>
+        </Card>
     );
 }
