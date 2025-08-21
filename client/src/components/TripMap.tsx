@@ -1,55 +1,103 @@
-// import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-import "leaflet-routing-machine";
+// components/TripMap.tsx
 
-import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { useState } from "react";
 
-interface TripMapProps {
-    from: [number, number]; // [lat, lng]
-    to: [number, number];
-    gasStations?: [number, number][]; // array of POIs
+export interface TripMapProps {
+    center?: [number, number];
+    fromCoords?: [number, number] | null;
+    toCoords?: [number, number] | null;
+    onSelect?: (lat: number, lng: number, type: "from" | "to" | "reset") => void;
+    readOnly?: boolean;
+    onAddressUpdate?: (address: string, type: "from" | "to") => void;
+    height?: string | number;
 }
 
-const TripMap: React.FC<TripMapProps> = ({ from, to, gasStations = [] }) => {
-    useEffect(() => {
-        const map = L.map("trip-map").setView(from, 6);
+function MapClickHandler({
+    onSelect,
+    readOnly,
+}: {
+    onSelect?: (lat: number, lng: number) => void;
+    readOnly?: boolean;
+}) {
+    useMapEvents({
+        click(e) {
+            if (!readOnly && onSelect) {
+                onSelect(e.latlng.lat, e.latlng.lng);
+            }
+        },
+    });
+    return null;
+}
 
-        // Tile Layer
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '&copy; OpenStreetMap contributors',
-        }).addTo(map);
+export default function TripMap({
+    center = [39.8283, -98.5795],
+    fromCoords,
+    toCoords,
+    onSelect,
+    readOnly = false,
+    onAddressUpdate,
+    height = 400,
+}: TripMapProps) {
+    const [fromAddress, setFromAddress] = useState("");
+    const [toAddress, setToAddress] = useState("");
 
-        // Routing Control
-        L.Routing.control({
-            waypoints: [L.latLng(from[0], from[1]), L.latLng(to[0], to[1])],
-            routeWhileDragging: false,
-            showAlternatives: false,
-            lineOptions: {
-                styles: [{ color: "#0077ff", weight: 5 }],
-            },
-            createMarker: function (i, waypoint, n) {
-                const label = i === 0 ? "Start" : i === n - 1 ? "Destination" : "Stop";
-                return L.marker(waypoint.latLng).bindPopup(label);
-            },
-        }).addTo(map);
+    const fetchLocationName = async (lat: number, lon: number) => {
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
+            );
+            const data = await res.json();
+            return data.display_name || `${lat}, ${lon}`;
+        } catch {
+            return `${lat}, ${lon}`;
+        }
+    };
 
-        // Gas Station Markers
-        gasStations.forEach((station, idx) => {
-            L.marker(station, {
-                icon: L.icon({
-                    iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149060.png",
-                    iconSize: [24, 24],
-                })
-            }).addTo(map)
-                .bindPopup(`Gas Station #${idx + 1}`);
-        });
+    const handleSelect = async (lat: number, lng: number) => {
+        if (onSelect) {
+            if (!fromCoords) {
+                const name = await fetchLocationName(lat, lng);
+                setFromAddress(name);
+                onAddressUpdate?.(name, "from");
+                onSelect(lat, lng, "from");
+            } else if (!toCoords) {
+                const name = await fetchLocationName(lat, lng);
+                setToAddress(name);
+                onAddressUpdate?.(name, "to");
+                onSelect(lat, lng, "to");
+            } else {
+                // reset new starting point
+                const name = await fetchLocationName(lat, lng);
+                setFromAddress(name);
+                setToAddress("");
+                onAddressUpdate?.(name, "from");
+                onSelect(lat, lng, "reset");
+            }
+        }
+    };
 
-        return () => {
-            map.remove();
-        };
-    }, [from, to, gasStations]);
+    return (
+        <div style={{ height }}>
+            <MapContainer center={center} zoom={5} style={{ height: "100%", width: "100%" }}>
+                <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapClickHandler onSelect={handleSelect} readOnly={readOnly} />
 
-    return <div id="trip-map" style={{ height: "500px", width: "100%" }} />;
-};
-
-export default TripMap;
+                {fromCoords && (
+                    <Marker position={fromCoords}>
+                        <Popup>{fromAddress || "Start"}</Popup>
+                    </Marker>
+                )}
+                {toCoords && (
+                    <Marker position={toCoords}>
+                        <Popup>{toAddress || "Destination"}</Popup>
+                    </Marker>
+                )}
+            </MapContainer>
+        </div>
+    );
+}

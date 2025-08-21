@@ -20,7 +20,7 @@ export const updateTrip = async (
     id: number,
     data: Partial<Trip>
 ): Promise<Trip> => {
-    const res = await apiClient.put<Trip>(`/trip/${id}`, data);
+    const res = await apiClient.patch<Trip>(`/trip/${id}`, data);
     return res.data;
 };
 

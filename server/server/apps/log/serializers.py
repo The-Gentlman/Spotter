@@ -79,3 +79,9 @@ class LogDaySerializer(serializers.ModelSerializer):
             )
 
         return data
+
+    def update(self, instance, validated_data):
+        if "segments" in validated_data:
+            instance.segments = validated_data["segments"]
+            instance.recalc_totals()
+        return super().update(instance, validated_data)

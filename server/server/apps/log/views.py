@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from apps.log.models import LogDay
 from rest_framework import status
 from apps.log.filters import LogDayFilter
+from django.utils.timezone import now
 
 
 class LogsView(GenericAPIView):
@@ -51,6 +52,16 @@ class LogDetailView(GenericAPIView):
                 {"detail": "Log not found."}, status=status.HTTP_404_NOT_FOUND
             )
         return Response(self.serializer_class(log).data, status=status.HTTP_200_OK)
+
+    def post(self, request, trip_id):
+        today = now().date()
+        log, created = LogDay.objects.get_or_create(
+            trip_id=trip_id, service_day=today, defaults={"segments": []}
+        )
+        if created:
+            log.recalc_totals()
+            log.save()
+        return Response(LogDaySerializer(log).data, status=status.HTTP_200_OK)
 
     def put(self, request, id):
         log = self.get_queryset().filter(id=id).first()

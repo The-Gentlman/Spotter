@@ -1,7 +1,10 @@
+import datetime
+from decimal import Decimal
 from django.utils.functional import cached_property
 from apps.trip.models import Trip
 from django.utils import timezone
 from django.db import models
+from django.utils.timezone import make_aware
 
 
 class LogManager(models.Manager):
@@ -10,6 +13,13 @@ class LogManager(models.Manager):
 
 
 class LogDay(models.Model):
+    SEGMENT_STATUSES = [
+        ("OFF_DUTY", "Off Duty"),
+        ("SLEEPER", "Sleeper Berth"),
+        ("DRIVING", "Driving"),
+        ("ON_DUTY", "On Duty (not driving)"),
+    ]
+
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="logs")
     service_day = models.DateField(default=timezone.now)
 
@@ -67,3 +77,48 @@ class LogDay(models.Model):
             "sleeper_hr": self.sleeper / 60,
             "cycle_remaining_hr": float(self.cycle_remaining_hours),
         }
+
+    def recalc_totals(self):
+        """Recalculate duty status totals from segments."""
+        totals = {"OFF_DUTY": 0, "SLEEPER": 0, "DRIVING": 0, "ON_DUTY": 0}
+
+        for seg in self.segments or []:
+            try:
+                start = datetime.fromisoformat(seg["start"].replace("Z", "+00:00"))
+                if not start.tzinfo:
+                    start = make_aware(start)
+                if seg.get("end"):
+                    end = datetime.fromisoformat(seg["end"].replace("Z", "+00:00"))
+                    if not end.tzinfo:
+                        end = make_aware(end)
+                else:
+                    end = make_aware(datetime.utcnow())
+            except (ValueError, KeyError):
+                continue
+
+            minutes = max(0, int((end - start).total_seconds() / 60))
+            if seg["status"] in totals:
+                totals[seg["status"]] += minutes
+
+        self.off_duty = totals["OFF_DUTY"]
+        self.sleeper = totals["SLEEPER"]
+        self.driving = totals["DRIVING"]
+        self.on_duty = totals["ON_DUTY"]
+        self.has_violation = self.check_violation()
+        self.cycle_remaining_hours = self.calc_cycle_remaining()
+
+    def check_violation(self):
+        """Basic FMCSA violation checks."""
+        if self.driving > 11 * 60:
+            return True
+        if (self.driving + self.on_duty) > 14 * 60:
+            return True
+        return False
+
+    def calc_cycle_remaining(self):
+        """Example: 70/8 cycle remaining."""
+        total_last_8_days = sum(
+            day.get("on_duty", 0) for day in self.recap_last_7_days or []
+        )
+        remaining = max(0, (70 * 60) - total_last_8_days) / 60
+        return Decimal(str(round(remaining, 2)))

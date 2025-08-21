@@ -33,6 +33,8 @@ class TripSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "start_date",
+            "title",
+            "description",
             "end_date",
             "driver",
             "driver_id",
@@ -94,3 +96,28 @@ class TripSerializer(serializers.ModelSerializer):
                 )
 
         return data
+
+
+class TripPatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trip
+        fields = [
+            "title",
+            "description",
+            "co_driver_name",
+            "status",
+            "from_location",
+            "to_location",
+        ]
+        extra_kwargs = {
+            field: {"required": False, "allow_null": True} for field in fields
+        }
+
+    def validate(self, data):
+        return data
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
