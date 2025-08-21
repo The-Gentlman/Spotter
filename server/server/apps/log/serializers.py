@@ -72,7 +72,6 @@ class LogDaySerializer(serializers.ModelSerializer):
                 {"total": "Total duty status minutes cannot exceed 24 hours."}
             )
 
-        # 14-hour on-duty window
         if data.get("driving", 0) + data.get("on_duty", 0) > 14 * 60:
             raise serializers.ValidationError(
                 {"hos": "On-duty + driving exceeds 14-hour (TOLD limit)."}
