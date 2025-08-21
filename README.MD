@@ -1,14 +1,11 @@
-# Spotter DJANGO SERVER
+# Spotter Project
 
-## Tech stack
-
-We're using these in out application
-
-### Important-Packages
+# Important-Packages
 
 - [Django-4.2.1](https://www.djangoproject.com/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Python-3.11](https://www.python.org/)
+- [React](https://github.com/vitejs/vite-plugin-react "React Repository")
 
 ## Notable opinions and extensions
 
@@ -16,19 +13,12 @@ Django is an opinionated framework and I've added a few extra opinions based on
 having Dockerized and deployed a number of Django projects. Here's a few (but
 not all) note worthy additions and changes.
 
-- **Packages and extensions**:
-
-  - *[gunicorn](https://gunicorn.org/)* for server in both development and production
 - **Linting and formatting**:
-  -----------------------
-
-
-  - *[black](https://github.com/psf/black)* is used to format the code base
+- - *[black](https://github.com/psf/black)* is used to format the code base
 - **Django apps**:
 
   - Add apps folder to contain all applications
   - Add common app for function and codes that works globaly
-  - In some app you may see  *[services.py ]()* this contains Notification and History System code
 - **Config**:
 
   - Log to STDOUT so that Docker can consume and deal with log output
@@ -70,46 +60,33 @@ these commands for PowerShell if you want.
 
 ```sh
 git clone https://github.com/The-Gentlman/Spotter.git
-cd server
+cd Spotter
 ```
 
-#### Copy an example .env file because the real one is git ignored:
-
 ```sh
-cp .env.example .env.dev
+make up # this will run whole project 
 ```
 
     change the name to .env.dev
 
 #### Build everything:
 
-*The first time you run this it's going to take 5-10 minutes depending on your
-internet connection speed and computer's hardware specs. That's because it's
-going to download a few Docker images and build the Python + apt dependencies.*
-
 ```sh
-make dev/run
+# I also added a template database for this project
+# in make file after you run project simply run 
+make restore
+
+# and run project again
 ```
 
 Now that everything is built and running we can treat it like any other Django
 app.
 
-Did you receive a `depends_on` "Additional property required is not allowed"
-error? Please update to at least Docker Compose v2.24.6+ or Docker Desktop
-25.0.3+.
-
-Did you receive an error about a port being in use? Chances are it's because
-something on your machine is already running on port 8000. Check out the docs
-in the `.env` file for the `DOCKER_WEB_PORT_FORWARD` variable to fix this.
-
-Did you receive a permission denied error? you may need to check the .env file and fill
-ALLOWD HOST if you face same error again just down the server and run it again.
-
-#### Setup the initial database:
+Setup the initial database:
 
 ```sh
 # You can run this from a 2nd terminal.
-make dev/migrate
+make migrate
 ```
 
 #### Check it out in a browser:
@@ -120,25 +97,12 @@ You should see Spotter Server
 
 #### Connection To Fronend of this application:
 
-You should go to ./server/.env file
-
-and add requested ip addreses to DJANGO_ALLOWED_HOSTS
-
-#### Stopping everything:
-
-```sh
-# Stop the containers and remove a few Docker related resources associated to this project.
-make dev/down
-```
+Visit [http://localhost:3000](http://localhost:3000) in your favorite browser.Stopping everything:
 
 ## Files of interest
 
-I recommend checking out most files and searching the code base for `TODO:`,
-but please review the `.env` and `run` files before diving into the rest of the
-code and customizing it.
+I added another application for file uploading, but due to the short amount of time I had, I didn’t get a chance to implement it in the frontend as well.
 
-### `.env`
+I also added an authentication system based on users and their roles, but it hasn’t been implemented in the frontend, and the authentication system in the backend is currently commented out.
 
-This file is ignored from version control so it will never be commit. There's a
-number of environment variables defined here that control certain options and
-behavior of the application.
+After uncommenting the authentication system, this app will not work unless a session exists in the request and Django can identify the user.
