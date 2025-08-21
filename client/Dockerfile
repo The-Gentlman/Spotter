@@ -1,17 +1,19 @@
 FROM node:20-alpine
 
+# Set the working directory inside the container to /app
 WORKDIR /app
 
-# Install dependencies
+# Copy only the package.json file to the working directory
 COPY package.json .
 
-RUN npm install --legacy-peer-deps
+# Install npm dependencies based on the package.json
+RUN npm install
 
-# Add rest of the client code
+# Copy the rest of the application code to the working directory
 COPY . .
 
-# Expose the port the app runs on
-EXPOSE 3333
+# Expose port 5002 to allow external access
+EXPOSE 5002
 
-# Start the app in development mode
-CMD pnpm dev --port 3333}
+# Specify the command to run the application when the container starts
+CMD [ "npm", "run", "dev"]

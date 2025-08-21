@@ -23,9 +23,28 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     command: postgres -p ${SQL_PORT}
     env_file:
-    
       - .env
+
+  client:
+    container_name: client
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+    stdin_open: true
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8888/api/v1/
+      - NODE_ENV=development
+    
+    depends_on:
+      - backend
+    command: npm run dev
 
 volumes:
   postgres_data:
   django_static_volume:
+  react_static_volume:
